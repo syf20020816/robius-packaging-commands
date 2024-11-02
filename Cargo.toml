@@ -2,15 +2,22 @@
 name = "robius-packaging-commands"
 version = "0.1.0"
 edition = "2021"
+authors = [
+    "Kevin Boos <kevinaboos@gmail.com>",
+    "Robius Project Maintainers",
+]
 rust-version = "1.79" ## required by cargo-packager
 description = """
 A multi-platform companion tool to help package your Rust app when using `cargo-packager`.
 This should be invoked by cargo-packager's "before-package" and "before-each-package" hooks,
 which you specify in your `Cargo.toml` file under the `[package.metadata.packager]` section.
 """
-categories = ["development-tools"]
+categories = [ "development-tools", "command-line-utilities" ]
 license = "MIT"
 readme = "README.md"
+keywords = [ "robius", "app", "bundle", "package", "makepad" ]
+documentation = "https://docs.rs/robius-packaging-commands"
+homepage = "https://robius.rs/"
 
 
 [dependencies]
