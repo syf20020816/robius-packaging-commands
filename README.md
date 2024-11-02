@@ -1,11 +1,57 @@
 # robius-packaging-commands
 A multi-platform companion tool to help package your Rust app when using `cargo-packager`.
 
-
-This program should be invoked by cargo-packager's "before-package" and "before-each-package" hooks,
+## Quick example of usage
+This program should be invoked by `cargo-packager`'s "before-package" and "before-each-package" hooks,
 which you must specify in your `Cargo.toml` file under the `[package.metadata.packager]` section.
+See the example below:
 
-See this example of how [the Robrix app uses this crate](https://github.com/project-robius/robrix/blob/980aa7ec48119cda5c08e889d872febefc253c93/Cargo.toml#L127-L163).
+```toml
+## Configuration for `cargo packager`
+[package.metadata.packager]
+product_name = "Robrix"
+
+...
+
+## This runs just one time before packaging starts; thus, it is used
+## mostly just to handle resources and target-agnostic stuff.
+before-packaging-command = """
+robius-packaging-commands before-packaging \
+    --binary-name robrix \
+    --path-to-binary ./target/release/robrix
+"""
+
+...
+
+## This runs once before building each separate kind of package,
+## so it is used to build your app specifically for each package kind.
+before-each-package-command = """
+robius-packaging-commands before-each-package \
+    --binary-name robrix \
+    --path-to-binary ./target/release/robrix
+"""
+```
+
+Once you have this package metadata fully completed in your app crate's `Cargo.toml`,
+you are ready to run.
+
+1. Install `cargo-packager`:
+```sh
+rustup update stable  ## Rust version 1.79 or higher is required
+cargo +stable install --force --locked cargo-packager
+```
+
+2. Install this crate (assuming you're building a Makepad app):
+```sh
+cargo install --locked --features makepad --git https://github.com/project-robius/robius-packaging-commands.git
+```
+
+3. Then run the packaging routine:
+```sh
+cargo packager --release ## --verbose is optional
+```
+
+## More info
 
 This program must be run from the root of the project directory,
 which is also where the `cargo-packager` command must be invoked from,
@@ -26,3 +72,7 @@ It requires passing in three arguments:
 
 This program uses the `CARGO_PACKAGER_FORMAT` environment variable to determine
 which specific build commands and configuration options should be used.
+
+## License
+
+MIT
