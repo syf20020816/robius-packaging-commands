@@ -1,0 +1,23 @@
+[package]
+name = "robius-packaging-commands"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.79" ## required by cargo-packager
+description = """
+A multi-platform companion tool to help package your Rust app when using `cargo-packager`.
+This should be invoked by cargo-packager's "before-package" and "before-each-package" hooks,
+which you specify in your `Cargo.toml` file under the `[package.metadata.packager]` section.
+"""
+categories = ["development-tools"]
+license = "MIT"
+readme = "README.md"
+
+
+[dependencies]
+cargo_metadata = { version = "0.18", optional = true }
+
+[features]
+## Enable this feature when building/packaging a Makepad app.
+## This will ensure that Makepad-specific settings are correctly enabled when building,
+## and that the Makepad-specific resource files are included in the compiled package.
+makepad = [ "dep:cargo_metadata" ]
