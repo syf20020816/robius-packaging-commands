@@ -21,4 +21,4 @@ homepage = "https://robius.rs/"
 
 
 [dependencies]
-cargo_metadata = { version = "0.18", optional = true }
+cargo_metadata = "0.18"
