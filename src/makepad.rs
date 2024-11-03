@@ -1,5 +1,9 @@
-use std::path::Path;
+use std::{path::Path, sync::OnceLock};
 use cargo_metadata::MetadataCommand;
+
+pub(crate) static FORCE_MAKEPAD: OnceLock<bool> = OnceLock::new();
+pub(crate) static IS_MAKEPAD_APP: OnceLock<bool> = OnceLock::new();
+
 
 /// Returns the value of the `MAKEPAD_PACKAGE_DIR` environment variable
 /// that must be set for the given package format.
@@ -29,6 +33,22 @@ pub(crate) fn makepad_package_dir_value(package_format: &str, main_binary_name: 
 }
 
 
+/// Returns whether the package being built is a makepad app, i.e., it depends on `makepad-widgets`.
+pub(crate) fn is_makepad_app() -> bool {
+    *IS_MAKEPAD_APP.get_or_init(|| {
+        MetadataCommand::new()
+            .exec()
+            .ok()
+            .map(|cargo_metadata| cargo_metadata
+                .packages
+                .iter()
+                .any(|package| package.name == "makepad-widgets")
+            )
+            .unwrap_or(false)
+    })
+}
+
+
 /// Recursively copies the Makepad-specific resource files.
 ///
 /// This uses `cargo-metadata` to determine the location of the `makepad-widgets` crate,
@@ -38,22 +58,27 @@ pub(crate) fn copy_makepad_resources<P>(dist_resources_dir: P) -> std::io::Resul
 where
     P: AsRef<Path>
 {
-    let makepad_widgets_resources_dest = dist_resources_dir.as_ref().join("makepad_widgets").join("resources");
+    let makepad_widgets_resources_dest = dist_resources_dir.as_ref()
+        .join("makepad_widgets")
+        .join("resources");
     let makepad_widgets_resources_src = {
         let cargo_metadata = MetadataCommand::new()
             .exec()
             .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
 
-        let makepad_widgets_package = cargo_metadata
+        let makepad_widgets_package_res = cargo_metadata
             .packages
             .iter()
             .find(|package| package.name == "makepad-widgets")
             .ok_or_else(|| std::io::Error::new(
                 std::io::ErrorKind::NotFound,
-                "makepad-widgets package not found"),
-            )?;
+                "makepad-widgets package not found"
+            ));
 
-        makepad_widgets_package.manifest_path
+        let _ = IS_MAKEPAD_APP.set(makepad_widgets_package_res.is_ok());
+
+        makepad_widgets_package_res?
+            .manifest_path
             .parent()
             .ok_or_else(|| std::io::Error::new(
                 std::io::ErrorKind::NotFound,
