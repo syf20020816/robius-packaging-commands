@@ -1,0 +1,6 @@
+## Cargo generated directory
+/command/target/
+# command/
+.vscode
+.DS_Store
+
