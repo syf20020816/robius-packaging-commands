@@ -5,6 +5,7 @@ edition = "2021"
 authors = [
     "Kevin Boos <kevinaboos@gmail.com>",
     "Robius Project Maintainers",
+    "Will Sheng <syf20020816@outlook.com>"
 ]
 rust-version = "1.79" ## required by cargo-packager
 description = """
